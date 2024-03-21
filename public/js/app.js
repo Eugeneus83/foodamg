@@ -9409,7 +9409,7 @@ var Cart = function Cart(props) {
           case 0:
             setIsDataSubmitting(true);
             _context.next = 3;
-            return fetch('/api/orders/create/', {
+            return fetch('/api/orders/create', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',

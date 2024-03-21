@@ -80,9 +80,9 @@ class OrderController extends Controller
      * @param  \App\Models\Order  $order
      * @return \Illuminate\Http\Response
      */
-    public function show(int $orderId)
+    public function show(int|string $orderId)
     {
-        $order = Order::find($orderId);
+        $order = Order::find((int)$orderId);
         return response()->json($order)->withHeaders([
             'Content-Type' => 'application/json'
         ]);
