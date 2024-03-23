@@ -34,7 +34,7 @@ const Cart = (props) => {
 
     const submitOrderHandler = async (orderData) => {
         setIsDataSubmitting(true);
-        const response = await fetch('/api/orders/create', {
+        const response = await fetch('/api/orders', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

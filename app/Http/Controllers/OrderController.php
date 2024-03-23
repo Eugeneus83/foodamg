@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Jobs\ProcessOrder;
 use App\Models\Order;
 use App\Models\OrderProduct;
-use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Enums\OrderStatus;
+use \Illuminate\Http\JsonResponse;
 
 class OrderController extends Controller
 {
@@ -19,19 +21,7 @@ class OrderController extends Controller
     {
         $user = $request->user();
         $orders = Order::where('user_id', $user->id)->get();
-        return response()->json($orders)->withHeaders([
-            'Content-Type' => 'application/json'
-        ]);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
+        return response()->json($orders);
     }
 
     /**
@@ -40,7 +30,7 @@ class OrderController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         $request->validate([
             'name' => 'required|string',
@@ -52,10 +42,13 @@ class OrderController extends Controller
         $user = $request->user();
 
         $orderData = request(['name', 'phone', 'address']);
-        $orderData['total'] =  array_reduce($request->items, fn($sum, $item) => $sum + $item['price'] * $item['amount']);
+        $orderData['total'] = array_reduce($request->items, fn($sum, $item) => $sum + $item['price'] * $item['amount']);
         $orderData['user_id'] = $user->id;
-        $orderData['status'] = 'pending';
-        $order = Order::create($orderData);
+
+        $order = new Order();
+        $order->fill($orderData);
+        $order->setStatus(OrderStatus::PENDING);
+        $order->save();
 
         if ($order) {
             foreach ($request->items as $item) {
@@ -69,9 +62,7 @@ class OrderController extends Controller
 
         ProcessOrder::dispatch($order)->delay(now()->addMinutes(3));
 
-        return response()->json(['success' => true])->withHeaders([
-            'Content-Type' => 'application/json'
-        ]);
+        return response()->json(['success' => true]);
     }
 
     /**
@@ -80,45 +71,8 @@ class OrderController extends Controller
      * @param  \App\Models\Order  $order
      * @return \Illuminate\Http\Response
      */
-    public function show(int|string $orderId)
+    public function show(Order $order): JsonResponse
     {
-        $order = Order::find((int)$orderId);
-        return response()->json($order)->withHeaders([
-            'Content-Type' => 'application/json'
-        ]);
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Order  $order
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Order $order)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\Order  $order
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, Order $order)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\Order  $order
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(Order $order)
-    {
-        //
+        return response()->json($order);
     }
 }

@@ -18,11 +18,11 @@ use App\Http\Controllers\OrderController;
 */
 
 Route::group(['middleware' => 'auth:sanctum'], function () {
-    Route::get('/products/get', [ProductController::class, 'index']);
+    Route::get('/products', [ProductController::class, 'index']);
     Route::get('/user', [AuthController::class, 'user']);
     Route::get('/orders', [OrderController::class, 'index']);
-    Route::post('/orders/create', [OrderController::class, 'store']);
-    Route::get('/orders/{order_id}', [OrderController::class, 'show']);
+    Route::post('/orders', [OrderController::class, 'store']);
+    Route::get('/orders/{order}', [OrderController::class, 'show']);
 });
 
 Route::post('/login', [AuthController::class, 'login']);

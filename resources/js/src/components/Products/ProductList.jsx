@@ -14,7 +14,7 @@ const ProductList = () => {
 
     const fetchProducts = async () => {
         setIsLoading(true);
-        const response = await fetch('/api/products/get/', {
+        const response = await fetch('/api/products', {
             headers: {
                 'Accept': 'application/json',
                 'Authorization': 'Bearer ' + accessToken

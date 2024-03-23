@@ -9,6 +9,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use App\Enums\OrderStatus;
 
 class ProcessOrder implements ShouldQueue
 {
@@ -31,7 +32,7 @@ class ProcessOrder implements ShouldQueue
      */
     public function handle(): void
     {
-        $this->order->status  = 'processed';
+        $this->order->setStatus(OrderStatus::PROCESSED);
         $this->order->save();
     }
 }

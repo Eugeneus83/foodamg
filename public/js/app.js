@@ -9409,7 +9409,7 @@ var Cart = function Cart(props) {
           case 0:
             setIsDataSubmitting(true);
             _context.next = 3;
-            return fetch('/api/orders/create', {
+            return fetch('/api/orders', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -10394,7 +10394,7 @@ var ProductList = function ProductList() {
           case 0:
             setIsLoading(true);
             _context.next = 3;
-            return fetch('/api/products/get/', {
+            return fetch('/api/products', {
               headers: {
                 'Accept': 'application/json',
                 'Authorization': 'Bearer ' + accessToken

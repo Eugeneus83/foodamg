@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Enums\OrderStatus;
 
 class Order extends Model
 {
@@ -22,9 +23,9 @@ class Order extends Model
 
     public $timestamps = true;
 
-    public function products()
+    public function setStatus(OrderStatus $status): void
     {
-        return $this->hasMany(OrderProduct::class);
+        $this->status = $status->value;
     }
 
 }
