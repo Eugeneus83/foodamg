@@ -3,41 +3,27 @@ import {useSelector} from "react-redux";
 import OrderItem from "../Orders/OrderItem/OrderItem";
 import Card from "../UI/Card";
 import styles from "./OrderList.module.css";
+import useHttp from "../../hooks/http";
 
 const OrdersList = (props) => {
 
-    const accessToken = useSelector((state) => state.main.accessToken);
-
     const [orders, setOrders] = useState([]);
-
-    const fetchOrders = async () => {
-        const response = await fetch('/api/orders', {
-            headers: {
-                'Accept': 'application/json',
-                'Authorization': 'Bearer ' + accessToken
-            }
-        });
-
-        if (!response.ok) {
-            throw new Error('Somethings is wrong');
-        }
-
-        let loadedOrders = [];
-        const responseData = await response.json();
-        for (const key in responseData) {
-            loadedOrders.push({
-                id: key,
-                ...responseData[key]
-            });
-        }
-        setOrders(loadedOrders);
-    };
+    const {isLoading, error: httpErrorMessage, sendHttpRequest: fetchOrders} = useHttp();
 
     useEffect(() => {
 
-        fetchOrders().catch(err => {
-            alert(err.message);
-        });
+        const manageOrders = (responseData) => {
+            let loadedOrders = [];
+            for (const key in responseData) {
+                loadedOrders.push({
+                    id: key,
+                    ...responseData[key]
+                });
+            }
+            setOrders(loadedOrders);
+        }
+
+        fetchOrders('/api/orders', {}, manageOrders);
 
     }, []);
 

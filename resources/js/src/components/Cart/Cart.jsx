@@ -5,17 +5,17 @@ import Modal from "../UI/Modal";
 import CartItem from "./CartItem";
 import SubmitOrder from './SubmitOrder';
 import {cartActions} from "../../store/cart-slice";
+import useHttp from "../../hooks/http";
 
 const Cart = (props) => {
 
     const dispatchFunction = useDispatch();
     const cart = useSelector((state) => state.cart);
-    const accessToken = useSelector((state) => state.main.accessToken);
-
+    const {isLoading: isDataSubmitting, sendHttpRequest: postOrder} = useHttp();
     const [isSubmitOrderAvailable, setIsSubmitOrderAvailable] = useState(false);
-    const [isDataSubmitting, setIsDataSubmitting] = useState(false);
-    const [wasDataSendingSuccessful, setWasDataSendingSuccessful] = useState(false);
     const [error, setError] = useState(false);
+
+    const [wasDataSendingSuccessful, setWasDataSendingSuccessful] = useState(false);
 
     const orderHandler = (event) => {
         event.preventDefault();
@@ -33,30 +33,25 @@ const Cart = (props) => {
     };
 
     const submitOrderHandler = async (orderData) => {
-        setIsDataSubmitting(true);
-        const response = await fetch('/api/orders', {
+
+        postOrder('/api/orders', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'Authorization': 'Bearer ' + accessToken,
+              'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
+            data: {
                 name: orderData.name,
                 phone: orderData.phone,
                 address: orderData.address,
                 items: cart.items
-            })
+            }
+        }, (response) => {
+            if (response.success === true) {
+                setWasDataSendingSuccessful(true);
+                dispatchFunction(cartActions.clearCart());
+            }
         });
 
-        setIsDataSubmitting(false);
-        if (!response.ok) {
-            setWasDataSendingSuccessful(false);
-            setError('Something is wrong. Please try later');
-        }else {
-            setWasDataSendingSuccessful(true);
-            dispatchFunction(cartActions.clearCart());
-        }
     };
 
     const cartItems = <ul className={styles['cart-items']}>

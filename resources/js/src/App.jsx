@@ -7,7 +7,8 @@ import Products from "./components/Products/Products";
 import Cart from "./components/Cart/Cart";
 import OrderDetails from "./components/Orders/OrderDetails";
 import Orders from './components/Orders/Orders';
-import {checkAccessToken} from './store/main-slice';
+import {mainActions} from './store/main-slice';
+import useHttp from "./hooks/http";
 
 let isInitialRunning = true;
 
@@ -15,12 +16,21 @@ const App = () => {
 
     const dispatchAction = useDispatch();
     const accessToken = useSelector((state) => state.main.accessToken);
+    const {error: userFetchError, sendHttpRequest: checkUser} = useHttp();
 
     useEffect(() => {
-        if (accessToken) {
-            dispatchAction(checkAccessToken(accessToken));
+
+        const manageUser = ()  => {
+            if (userFetchError) {
+              dispatchAction(mainActions.logout());
+            }
         }
-    }, []);
+
+        if (accessToken) {
+            checkUser('/api/user', {}, manageUser);
+        }
+
+    }, [checkUser]);
 
     const [cartIsVisible, setCartIsVisible] = useState(false);
 

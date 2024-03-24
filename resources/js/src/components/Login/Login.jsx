@@ -1,11 +1,12 @@
 import React, {useState, useEffect, useReducer, useRef} from "react";
 import {useSelector, useDispatch} from "react-redux";
-import { mainActions } from "../../store/main-slice";
+import {mainActions} from "../../store/main-slice";
 
 import Card from "../UI/Card";
 import styles from "./Login.module.css";
 import Button from "../UI/Button";
 import Input from "../UI/Input";
+import useHttp from "../../hooks/http";
 
 const Login = (props) => {
 
@@ -14,6 +15,8 @@ const Login = (props) => {
     const emailInputRef = useRef();
 
     const passwordInputRef = useRef();
+
+    const {sendHttpRequest: makeAuth} = useHttp();
 
     const submitHandler = (event) => {
         event.preventDefault();
@@ -24,21 +27,18 @@ const Login = (props) => {
             return;
         }
 
-        fetch('/api/login', {
+        makeAuth('/api/login', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
+                'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
+            data: {
                 email: email,
                 password: password
-            })
-        }).then(response => {
-            return response.json();
-        }).then(response => {
+            }
+        }, (loginData) => {
             dispatchFunction(mainActions.onLogin({
-                access_token: response.access_token
+                access_token: loginData.access_token
             }));
         });
     };

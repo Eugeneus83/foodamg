@@ -2,34 +2,24 @@ import React, {useEffect, useState} from 'react';
 import {Link, useParams} from 'react-router-dom';
 import {useSelector} from "react-redux";
 import styles from "./OrderDetails.module.css";
+import useHttp from "../../hooks/http";
 
 const OrderDetails = () => {
 
-    const accessToken = useSelector((state) => state.main.accessToken);
     const [loadedOrder, setLoadedOrder] = useState(false);
+    const {isLoading, error: httpErrorMessage, sendHttpRequest: fetchOrderDetails} = useHttp();
 
     const params = useParams();
 
-    const fetchOrderDetails = async () => {
-        const response = await fetch('/api/orders/' + params.orderId, {
-            headers: {
-                'Accept': 'application/json',
-                'Authorization': 'Bearer ' + accessToken
-            }
-        });
+    useEffect(() => {
 
-        if (!response.ok) {
-            throw new Error('Somethings is wrong');
+        const manageOrders = (loadedData) => {
+            setLoadedOrder(loadedData);
         }
 
-        const result = await response.json();
-        setLoadedOrder(result);
-    };
+        fetchOrderDetails('/api/orders/' + params.orderId, {}, manageOrders);
 
-    useEffect(() => {
-        fetchOrderDetails(params.orderId);
-
-    },  []);
+    },  [fetchOrderDetails]);
 
     if (!loadedOrder) {
         return '<p>Loading...</p>';
