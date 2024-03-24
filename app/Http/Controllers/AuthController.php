@@ -6,10 +6,11 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use Validator;
+use \Illuminate\Http\JsonResponse;
 
 class AuthController extends Controller
 {
-    public function login(Request $request)
+    public function login(Request $request): JsonResponse
     {
         $credentials = request(['email','password']);
         $rules = [
@@ -45,7 +46,7 @@ class AuthController extends Controller
         ]);
     }
 
-    public function user(Request $request)
+    public function user(Request $request): JsonResponse
     {
         return response()->json($request->user());
     }
