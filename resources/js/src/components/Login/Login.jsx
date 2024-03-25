@@ -16,7 +16,7 @@ const Login = (props) => {
 
     const passwordInputRef = useRef();
 
-    const {sendHttpRequest: makeAuth} = useHttp();
+    const {error: httpErrorMessage, sendHttpRequest: makeAuth} = useHttp();
 
     const submitHandler = (event) => {
         event.preventDefault();
@@ -37,11 +37,17 @@ const Login = (props) => {
                 password: password
             }
         }, (loginData) => {
-            dispatchFunction(mainActions.onLogin({
-                access_token: loginData.access_token
-            }));
+            if (loginData.access_token) {
+                dispatchFunction(mainActions.onLogin({
+                    access_token: loginData.access_token
+                }));
+            }
         });
     };
+
+    if (httpErrorMessage) {
+        alert('Login failed. Please try later');
+    }
 
     return (
         <Card className={styles.login}>

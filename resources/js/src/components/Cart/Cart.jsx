@@ -11,11 +11,15 @@ const Cart = (props) => {
 
     const dispatchFunction = useDispatch();
     const cart = useSelector((state) => state.cart);
-    const {isLoading: isDataSubmitting, sendHttpRequest: postOrder} = useHttp();
+    const {isLoading: isDataSubmitting, error: httpErrorMessage, sendHttpRequest: postOrder} = useHttp();
     const [isSubmitOrderAvailable, setIsSubmitOrderAvailable] = useState(false);
     const [error, setError] = useState(false);
 
     const [wasDataSendingSuccessful, setWasDataSendingSuccessful] = useState(false);
+
+    if (httpErrorMessage && !error) {
+        setError('Could not create order');
+    }
 
     const orderHandler = (event) => {
         event.preventDefault();
@@ -49,6 +53,8 @@ const Cart = (props) => {
             if (response.success === true) {
                 setWasDataSendingSuccessful(true);
                 dispatchFunction(cartActions.clearCart());
+            }else if (httpErrorMessage) {
+                setError('Could not create order');
             }
         });
 
