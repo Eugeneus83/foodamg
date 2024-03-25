@@ -9,6 +9,7 @@ use App\Models\OrderProduct;
 use Illuminate\Http\Request;
 use App\Enums\OrderStatus;
 use \Illuminate\Http\JsonResponse;
+use App\Http\Requests\StoreOrderRequest;
 
 class OrderController extends Controller
 {
@@ -30,17 +31,9 @@ class OrderController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request): JsonResponse
+    public function store(StoreOrderRequest $request): JsonResponse
     {
-        $request->validate([
-            'name' => 'required|string',
-            'address' => 'required|string',
-            'phone' => 'required|string',
-            'items' => 'required|array'
-        ]);
-
         $user = $request->user();
-
         $orderData = request(['name', 'phone', 'address']);
         $orderData['total'] = array_reduce($request->items, fn($sum, $item) => $sum + $item['price'] * $item['amount']);
         $orderData['user_id'] = $user->id;

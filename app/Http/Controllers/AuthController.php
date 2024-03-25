@@ -2,39 +2,21 @@
 
 namespace App\Http\Controllers;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
-use Validator;
 use \Illuminate\Http\JsonResponse;
+use App\Http\Requests\StoreUserRequest;
 
 class AuthController extends Controller
 {
-    public function login(Request $request): JsonResponse
+    public function login(StoreUserRequest $request): JsonResponse
     {
-        $credentials = request(['email','password']);
-        $rules = [
-            'email' => 'required|string|email',
-            'password' => 'required|string'
-        ];
-
-        $validator = Validator::make($credentials, $rules);
-
-        if ($validator->fails()){
-            return response()->json([
-                'status' => false,
-                'message' => 'validation error',
-                'errors' => $validator->errors()
-            ], 401);
-        }
-
-        if (Auth::attempt($credentials)) {
-            $user = $request->user();
-        }else {
+        $user = User::where('email', $request->email)->first();
+        if (!$user) {
             $user = User::create([
-                'email' => $credentials['email'],
+                'email' => $request->email,
                 'name' => 'Test user',
-                'password' => Hash::make($credentials['password'])
+                'password' => Hash::make($request->password)
             ]);
         }
         $tokenResult = $user->createToken('Personal Access Token');
