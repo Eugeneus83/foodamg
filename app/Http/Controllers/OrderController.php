@@ -5,14 +5,21 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Jobs\ProcessOrder;
 use App\Models\Order;
-use App\Models\OrderProduct;
 use Illuminate\Http\Request;
-use App\Enums\OrderStatus;
 use \Illuminate\Http\JsonResponse;
 use App\Http\Requests\StoreOrderRequest;
+use App\Services\OrderService;
 
 class OrderController extends Controller
 {
+
+    private $orderService;
+
+    public function __construct(OrderService $orderService)
+    {
+        $this->orderService = $orderService;
+    }
+
     /**
      * Display a listing of the resource.
      * @param  \Illuminate\Http\Request  $request
@@ -34,28 +41,13 @@ class OrderController extends Controller
     public function store(StoreOrderRequest $request): JsonResponse
     {
         $user = $request->user();
-        $orderData = request(['name', 'phone', 'address']);
-        $orderData['total'] = array_reduce($request->items, fn($sum, $item) => $sum + $item['price'] * $item['amount']);
+        $orderData = request(['name', 'phone', 'address', 'items']);
         $orderData['user_id'] = $user->id;
-
-        $order = new Order();
-        $order->fill($orderData);
-        $order->setStatus(OrderStatus::PENDING);
-        $order->save();
-
-        if ($order) {
-            foreach ($request->items as $item) {
-                OrderProduct::create([
-                    'product_id' => $item['id'],
-                    'order_id' => $order->id,
-                    'amount' => $item['amount']
-                ]);
-            }
-        }
+        $order = $this->orderService->createOrder($orderData);
 
         ProcessOrder::dispatch($order)->delay(now()->addMinutes(3));
 
-        return response()->json(['success' => true]);
+        return response()->json(['success' => true, 'order_id' => $order->id]);
     }
 
     /**
